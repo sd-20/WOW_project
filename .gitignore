@@ -1,3 +1,5 @@
+# packages that will not be pushed to github
 venv/
 *.txt
 *.xlsx
+__pycache__
