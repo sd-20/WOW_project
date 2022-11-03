@@ -15,10 +15,16 @@ This will allow you to install necessary packages and keep them contained in thi
 3. Install dependant packages using ```pip install -r requirements.txt```
 
 ## 2. How to Run the Script
-1. Open command prompt (windows) or terminal (mac)
-2. type  ```python3 scripts.py``` 
+1. Open command prompt (windows) or terminal (mac) and navigate to the project directory
+2. type  ```python3 scripts.py```
+3. Will eventually expand so you can type in file path parameters 
 
 ## 3. Results
 1. Navigate to the directory of the project
 2. Open ```output.xlsx``` in a spreadsheet editor to see results
 
+# Notes
+## Week 1
+- Some more fine tuning can be done for the rules to improve classification accuracy
+- Look into building a machine learning model utilizing classification algorithms 
+- Need to incorporate observing multiple lines (how would we feed this in to the model in the future, etc.)

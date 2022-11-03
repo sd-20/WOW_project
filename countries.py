@@ -4,6 +4,9 @@ import pycountry
 def get_countries():
     # stores all current countries
     countries_dict = {country.name: True for country in list(pycountry.countries)}
+    missing = ['USA', 'UK']
+    for country in missing:
+        countries_dict[country] = True
     # stores older countries like Yugoslavia
     countries_dict1 = {country.name: True for country in list(pycountry.historic_countries)} 
     return countries_dict, countries_dict1
