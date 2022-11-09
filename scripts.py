@@ -5,13 +5,6 @@ from countries import get_countries, is_country
 # used to check subsidiary countries (using ISO 3166 standards)
 countries_dict, countries_dict1 = get_countries()
 
-# function inputs (only working with one book for now)
-book = 'books/EUROPE_1980_p3132.txt'
-year = 1980
-continent = "Europe"
-output = 'spreadsheets/output.xlsx'
-
-
 def book_to_xlsx(book, year, continent, output):
     """
     function to transform a text file into a spreadsheet
@@ -26,7 +19,7 @@ def book_to_xlsx(book, year, continent, output):
     # list to store each row in the spreadsheet
     rows = []
 
-    with open(book, 'r', errors="ignore", encoding="utf-8") as file:
+    with open('books/' + book, 'r', errors="ignore", encoding="utf-8") as file:
         # for each line in the file, get the line index (line_id), and line (line) 
         for line_id, line in enumerate(file):
 
@@ -83,10 +76,9 @@ def book_to_xlsx(book, year, continent, output):
 
     # transform rows into a data frame with corresponding columns and write to output xlsx file    
     data = pd.DataFrame(rows, columns = ["continent", "year", "line_id", "line_orig", "d_parent", "d_subsidiary", "d_waste", "d_part_prev_line", "d_subsidiary_country"])
-    with pd.ExcelWriter(output) as writer:
+    with pd.ExcelWriter('spreadsheets/' + output) as writer:
         data.to_excel(writer)  
 
-book_to_xlsx(book, year, continent, output)
 
 
 

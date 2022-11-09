@@ -1,0 +1,8 @@
+# pandas (helps transforms data into .xlsx)
+pandas
+
+# pycountry (record of all countries to help with identifying subsidary countries))
+pycountry
+
+# dependency for pandas module
+openpyxl

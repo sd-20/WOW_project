@@ -28,3 +28,10 @@ This will allow you to install necessary packages and keep them contained in thi
 - Some more fine tuning can be done for the rules to improve classification accuracy
 - Look into building a machine learning model utilizing classification algorithms 
 - Need to incorporate observing multiple lines (how would we feed this in to the model in the future, etc.)
+- Having a method of checking country names that are misspelled (whether close enough match to a country) 
+- Flag lines that might be mistaken for countries
+- Store Parent firm industry names as field (some countries may have multiple separated by ",")
+- Store Parent Country
+- Sometimes extra characters after country name ("," , "")
+- Match accented characters with corresponding origianl (U.S.A with Uaccented.S.A)
+- sometimes if country is repeated '
