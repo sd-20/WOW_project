@@ -6,3 +6,9 @@ pycountry
 
 # dependency for pandas module
 openpyxl
+
+# string matching 
+thefuzz
+
+# speeds up string matching
+thefuzz[speedup]

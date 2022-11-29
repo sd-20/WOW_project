@@ -1,9 +1,5 @@
 import pandas as pd
-from countries import get_countries, is_country
-
-# get dictionaries of all countries (current countries, older countries)
-# used to check subsidiary countries (using ISO 3166 standards)
-countries_dict, countries_dict1 = get_countries()
+from helpers import get_indent, get_countries, country_match, clean
 
 def book_to_xlsx(book, year, continent, output):
     """
@@ -16,71 +12,93 @@ def book_to_xlsx(book, year, continent, output):
     :return: None       
     """ 
 
+    # get dictionaries of all countries (current countries, older countries)
+    # used to check subsidiary countries (using ISO 3166 standards)
+    countries_dict = get_countries()
+    country_counts = {}
+    
     # list to store each row in the spreadsheet
     rows = []
+    cleaned_lines = []
 
     with open('books/' + book, 'r', errors="ignore", encoding="utf-8") as file:
-        # for each line in the file, get the line index (line_id), and line (line) 
+        # for each line in the file, get the line index (line_id), and line (line)
+        alpha, industry = '','' 
+        prev_indent = 0
+
         for line_id, line in enumerate(file):
-
-            # reinitialize fields at each new line
-            d_parent, d_subsidiary, d_waste, d_part_prev_line, d_subsidiary_country = 0, 0, 0, 0, 0
+           
+            d_parent, d_subsidiary, d_waste, d_part_prev_line, d_country_match = 0, 0, 0, 0, 0
             d_subsidiary_country = ''
-
             # remove all special characters ('\n', etc.) and white spaces at start & end of line
             stripped_line = line.strip()
-            
+            words = stripped_line.split()
+
             # skip stripped line if it is empty
             if len(stripped_line) == 0:
                 continue
-            #  lines with 5 characters or less are waste (page numbers, etc. ) unless previous line is a subsidiary 
-            elif len(stripped_line) <= 5:
-                if len(rows) > 0 and rows[-1][5] == 1:
-                    d_part_prev_line = 1
+            #  lines with 5 characters or less are waste (page numbers, etc.) unless previous line is a subsidiary or country (continuation)
+            elif len(stripped_line) <= 5 or len(words) <= 1:
+                if len(rows) > 0:
+                    if rows[-1][5] == 1 or rows[-1][4] == 1:
+                        d_part_prev_line = 1
                 else:
                     d_waste = 1
             else:
-                # difference in length from line and line without the left whitespaces gives the indent
-                indent = len(line) - len(line.lstrip()) 
-                
-                # difference in indents from current line and previous line
-                prev_diff = indent - (len(rows[-1][3]) - len(rows[-1][3].lstrip())) if line_id >= 1 else 0
-                
-                # first word in line (removing '"')
-                first_word = stripped_line.split()[0].replace("\"","")
-                # last word in line (removing '.' for countries (ex: U.S.A))                                                                            
-                last_word = stripped_line.split()[-1].replace(".","") 
-                # check for line ending of previous line (ex: "," indicates this line is part of prev)
-                prev_line_end = rows[-1][3].strip().split()[-1][-1] 
+                indent = get_indent(line)
+                prev_diff = indent - (prev_indent) if line_id >= 1 else 0                                                   # difference in indents from current line and previous line                                                                                      
+                last_word = clean(words[-1])                                       # last word in line (removing '.' and ',' for countries (ex: U.S.A) and multiple industries)                                                                            
+                prev_line_end = rows[-1][3].strip().split()[-1][-1]                                                         # check for line ending of previous line (ex: "," indicates this line is part of prev)
+                prev_indent = indent
 
-                # parent lines have an indent of 0, or end in two letter uppercase combos (ex: SE)
-                if indent == 0 and (len(last_word) == 2 and (last_word).isupper()) and first_word.isupper():
+                # parent lines have an indent of 0, or end in two/four letter industry combos (ex: SE or SE,EX)
+                if (indent == 0 
+                    and (((len(last_word) == 2 or len(last_word) == 4) 
+                    and (((last_word).isupper() and (last_word.isalpha())) 
+                    or last_word.isnumeric()))
+                    )):
                     d_parent = 1
+                
+                    industry = last_word if len(last_word) == 2 else ','.join([last_word[0:2], last_word[2:]])
                     # if previous line is a parent, and same indent then current is not, is part of prev
                     if (len(rows) > 0) and (rows[-1][4] == 1):
                         d_parent = 0
                         d_part_prev_line = 1
-                # if its an indent of 3 and first word is not uppercase its a subsidiary
-                elif indent == 3 or is_country(countries_dict, countries_dict1, last_word):
-                    d_subsidiary = 1        
-                    d_subsidiary_country = last_word if is_country(countries_dict, countries_dict1, last_word) else ''
+                # lines with indent of 3, or same indent as previous, or ending with country names are subsidiary
+                elif (indent == 3 
+                    or (prev_diff == 0 and rows[-1][4] == 0)
+                    or prev_diff == 4
+                    or country_match(stripped_line, countries_dict)
+                    ):
+                    d_subsidiary = 1
+                    if country_match(stripped_line, countries_dict):
+                        d_subsidiary_country, d_country_match = country_match(stripped_line, countries_dict)
+                        if country_counts.get(d_subsidiary_country) is not None:
+                            country_counts[d_subsidiary_country][1] = (country_counts[d_subsidiary_country][1]*country_counts[d_subsidiary_country][0] + d_country_match)/(country_counts[d_subsidiary_country][0]+1)  
+                            country_counts[d_subsidiary_country][0] += 1
+                        else:
+                            country_counts[d_subsidiary_country] = [1, d_country_match]
+
                 # if indent of 2, or 2 more than the prev line, or prev line ends with ",", it is part of it
-                elif indent == 2 or prev_diff == 2 or prev_line_end == ',':
+                elif indent == 2 or prev_diff <= 2 or prev_line_end == ',':
                     d_part_prev_line = 1   
                 # if nothing, else, then classify as subsidiary 
                 else:
                     d_subsidiary = 1
                 
             # add fields to list of rows            
-            rows.append([continent, year, line_id + 1, line, d_parent, d_subsidiary, d_waste, d_part_prev_line, d_subsidiary_country])
+            rows.append([continent, year, line_id + 1, line, d_parent, d_subsidiary, d_waste, d_part_prev_line, d_subsidiary_country, d_country_match, industry])
+            cleaned_lines.append([line_id + 1, stripped_line])
 
     # transform rows into a data frame with corresponding columns and write to output xlsx file    
-    data = pd.DataFrame(rows, columns = ["continent", "year", "line_id", "line_orig", "d_parent", "d_subsidiary", "d_waste", "d_part_prev_line", "d_subsidiary_country"])
+    book_data = pd.DataFrame(rows, columns = ["continent", "year", "line_id", "line_orig", "d_parent", "d_subsidiary", "d_waste", "d_part_prev_line", "d_subsidiary_country", "d_country_match", "industry"])
+    cleaned_lines_data = pd.DataFrame(cleaned_lines, columns = ["line_id", "line (cleaned)"])
+    countries_data = pd.DataFrame([list(country_counts.keys()), list(c[0] for c in country_counts.values()), list(c[1] for c in country_counts.values())]).T
+    countries_data.columns = ['Country', 'Counts', 'Accuracy']
     with pd.ExcelWriter('spreadsheets/' + output) as writer:
-        data.to_excel(writer)  
-
-
-
+        book_data.to_excel(writer, sheet_name = 'book data')  
+        cleaned_lines_data.to_excel(writer, sheet_name = 'cleaned lines')  
+        (countries_data).to_excel(writer, sheet_name = 'country data')
 
 
 
