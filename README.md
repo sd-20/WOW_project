@@ -3,12 +3,20 @@ Text scraping to identify parent companies and subsidiaries in given books (text
 
 # Steps
 
-## 1. Installing Python Virtual Environment and Packages
-
 ### System Prerequisites
 - Python version 3.10, (pip should be installed together)
+- git 
+
+## 1. Cloning from Github
+This step will allow you to clone this repository from github onto your local machine and run it 
+
+1. First download git [here](https://git-scm.com/download/)
+2. Clone this repository from github by running ```git clone https://github.com/sd-20/WOW_project.git``` inside your terminal in the desired parent directory
+
+## 2. Installing Python Virtual Environment and Packages
 
 This will allow you to install necessary packages and keep them contained in this directory
+1. Make sure you are in the project directory ```WOW_project```
 1. Run `python -m venv venv` in the directory of the project to install the virtual environment
 2. Then, activate the environment by running ```source venv/bin/activate``` (Mac) or ```venv\Scripts\Activate.ps1``` (Windows)
 3. Install dependant packages using ```pip install -r requirements.txt```
@@ -21,7 +29,7 @@ This will allow you to install necessary packages and keep them contained in thi
 ![url](url.png)
   
 
-## 2. How to Run the Script
+## 3. How to Run the Script
 1. Open command prompt (windows) or terminal (mac) and navigate to the project directory
 2. activate the virtual environment as explained [here](#system-prerequisites)
 
