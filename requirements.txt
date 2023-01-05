@@ -1,10 +1,10 @@
-# pandas (helps transforms data into .xlsx)
+# pandas (transform data into .xlsx)
 pandas
 
 # pycountry (record of all countries to help with identifying subsidary countries))
 pycountry
 
-# dependency for pandas module
+# dependency for pandas xl module
 openpyxl
 
 # string matching 
@@ -12,3 +12,6 @@ thefuzz
 
 # speeds up string matching
 thefuzz[speedup]
+
+# replace accented characters with closest ASCII representation
+Unidecode
