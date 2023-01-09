@@ -31,8 +31,8 @@ def get_countries():
 
 def get_iso_codes():
     iso_dict = {unidecode(country.name.upper()): country.numeric for country in list(pycountry.countries)}
-    common_miss = ['UK', 'US', 'USA', 'W GERMANY', 'IVORY COAST', 'EIRE', 'VENEZUELA', 'IRAN', 'TAIWAN', 'ENGLAND', 'COLUMBIA', 'WEST GERMANY']
-    common_miss_match = ['UNITED KINGDOM', 'UNITED STATES', 'UNITED STATES', 'GERMANY', 'COTE D\'IVOIRE', 'IRELAND', 'VENEZUELA, BOLIVARIAN REPUBLIC OF', 'IRAN, ISLAMIC REPUBLIC OF', 'TAIWAN, PROVINCE OF CHINA', 'UNITED KINGDOM', 'COLOMBIA', 'GERMANY']
+    common_miss = ['UK', 'US', 'USA', 'W GERMANY', 'IVORY COAST', 'EIRE', 'VENEZUELA', 'IRAN', 'TAIWAN', 'ENGLAND', 'COLUMBIA', 'WEST GERMANY', 'NETHERLANDS ANTILLES']
+    common_miss_match = ['UNITED KINGDOM', 'UNITED STATES', 'UNITED STATES', 'GERMANY', 'COTE D\'IVOIRE', 'IRELAND', 'VENEZUELA, BOLIVARIAN REPUBLIC OF', 'IRAN, ISLAMIC REPUBLIC OF', 'TAIWAN, PROVINCE OF CHINA', 'UNITED KINGDOM', 'COLOMBIA', 'GERMANY', 'NETHERLANDS']
     for missed, matched in zip(common_miss, common_miss_match):
         iso_dict[missed] = iso_dict[matched]
     return iso_dict
@@ -50,7 +50,7 @@ def country_match(line, countries_dict):
         return last_word, 100, ""   
     common_misses = ["AMERICA", "LIBRARY", "LOAN", "CIE", "GESTION", 
                     "FINANCE", "AFRICA", "ASIA", "WESTERN", "ALABAMA", 
-                    "CLUB", "CORP", "CO", "INC", "LATINA", "DENISON", "CIA"]
+                    "CLUB", "CORP", "CO", "INC", "LATINA", "DENISON", "CIA", "JERSEY"]
 
     if last_word in common_misses:
         return None
@@ -81,8 +81,32 @@ def country_match(line, countries_dict):
 
     return res
 
+# gets 2-digit uppercase letter industry codes
 def get_industry(word):
     res = ''
     for i in range(0,len(word), 2):
         res += word[i:i+2] + ','
     return res[:-1]
+
+# gets 4-digit numeric industry codes  
+def get_industry_numeric(word):
+    res = ''
+    for i in range(0,len(word), 4):
+        res += word[i:i+4] + ','
+    return res[:-1]
+
+# count of upper case letters in line
+def num_upper(line):
+    count = 0
+    for c in line:
+        if c.isupper():
+            count += 1
+    return count 
+
+# count of numeric digits in line
+def num_digits(line):
+    count = 0
+    for c in line:
+        if c.isnumeric():
+            count += 1
+    return count 
